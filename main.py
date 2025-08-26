@@ -142,6 +142,8 @@ def main():
     snippet_name = "addition.lisp"
 
     raw_source_text = (LISP_SNIPPET_DIR / snippet_name).read_text()
+    print(f"source, {len(raw_source_text)=}:\n{raw_source_text}")
+    print("length stripped: ", len(raw_source_text.strip()))
 
     # try to scan the source!
     tokens = scan(raw_source_text, debug=True)
