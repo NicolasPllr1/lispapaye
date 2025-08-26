@@ -1,6 +1,8 @@
-from pathlib import Path
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+
+from rich import print
 
 
 class TokenKind(Enum):
