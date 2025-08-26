@@ -97,18 +97,8 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                     literal = ""
                 else:
                     literal = source[head + 1 : idx]
-
             case "t":
                 tok_kind = TokenKind.TRUE
-                lexeme = source[idx]
-            case "nil":
-                tok_kind = TokenKind.NIL
-                lexeme = source[idx]
-            case "cons":
-                tok_kind = TokenKind.CONS
-                lexeme = source[idx]
-            case "quote":
-                tok_kind = TokenKind.QUOTE
                 lexeme = source[idx]
             case "'":
                 tok_kind = TokenKind.QUOTE_ABR
@@ -123,7 +113,37 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 tok_kind = TokenKind.MINUS
                 lexeme = source[idx]
             case _:
-                raise ValueError(f"Unexpected character at index {idx}: {source[idx]}")
+                if (
+                    idx + len(TokenKind.NIL.value) - 1 < len(source)
+                    and source[idx : idx + len(TokenKind.NIL.value)]
+                    == TokenKind.NIL.value
+                ):
+                    tok_kind = TokenKind.NIL
+                    lexeme = TokenKind.NIL.value
+                    literal = None
+                    idx += len(TokenKind.NIL.value)
+                elif (
+                    idx + len(TokenKind.CONS.value) - 1 < len(source)
+                    and source[idx : idx + len(TokenKind.CONS.value)]
+                    == TokenKind.CONS.value
+                ):
+                    tok_kind = TokenKind.CONS
+                    lexeme = TokenKind.CONS.value
+                    literal = None
+                    idx += len(TokenKind.CONS.value)
+                elif (
+                    idx + len(TokenKind.QUOTE.value) - 1 < len(source)
+                    and source[idx : idx + len(TokenKind.QUOTE.value)]
+                    == TokenKind.QUOTE.value
+                ):
+                    tok_kind = TokenKind.QUOTE
+                    lexeme = TokenKind.QUOTE.value
+                    literal = None
+                    idx += len(TokenKind.QUOTE.value)
+                else:
+                    raise ValueError(
+                        f"Unexpected character at index {idx}: {source[idx]}"
+                    )
 
         tok = Token(
             kind=tok_kind,
