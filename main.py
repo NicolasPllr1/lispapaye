@@ -65,7 +65,7 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 # look for the end of the number
                 while idx + 1 < len(source) and source[idx + 1].isdigit():
                     idx += 1
-                lexeme = source[head:idx]  # TODO: double check the bounds
+                lexeme = source[head : idx + 1]  # TODO: double check the bounds
                 if debug:
                     print(f"after number scanning, idx is {idx}")
             case '"':
