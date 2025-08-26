@@ -1,0 +1,7 @@
+[project]
+name = "lisp-interpreter"
+version = "0.1.0"
+description = "LISP interpreter"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
