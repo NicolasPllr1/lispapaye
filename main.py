@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -142,7 +143,11 @@ def scan(source: str, debug: bool = False) -> list[Token]:
 
 def main():
     LISP_SNIPPET_DIR = Path("lisp_snippets")
-    snippet_name = "addition.lisp"
+
+    if len(sys.argv) > 0:
+        snippet_name = sys.argv[1]
+    else:
+        snippet_name = "addition.lisp"
 
     raw_source_text = (LISP_SNIPPET_DIR / snippet_name).read_text()
     print(f"source, {len(raw_source_text)=}:\n{raw_source_text}")
