@@ -29,18 +29,22 @@ class Token:
     literal: str | None  # not every token is a literal / has a literal _value_
 
 
-def scan(source: str) -> list[Token]:
+def scan(source: str, debug: bool = False) -> list[Token]:
     "From raw source text to a 'stream' of tokens"
     tokens: list[Token] = []
     idx = 0  # idx into the source text
 
     while idx < len(source):
+        if debug:
+            print(f"Scanning at idx {idx}: {source[idx]}")
         tok_kind: TokenKind
         literal: str | None = None
         lexeme: str
         match source[idx]:
             case " ":
                 # skip whitespace
+                if debug:
+                    print("skipping whitespace")
                 idx += 1
                 continue
             case "(":
@@ -59,6 +63,8 @@ def scan(source: str) -> list[Token]:
                 while idx < len(source) and source[idx].isdigit():
                     idx += 1
                 lexeme = source[head:idx]  # TODO: double check the bounds
+                if debug:
+                    print(f"after number scanning, idx is {idx}")
             case '"':
                 tok_kind = TokenKind.STRING
 
@@ -115,13 +121,15 @@ def scan(source: str) -> list[Token]:
             case _:
                 raise ValueError(f"Unexpected character at index {idx}: {source[idx]}")
 
-        tokens.append(
-            Token(
-                kind=tok_kind,
-                lexeme=lexeme,
-                literal=literal,
-            )
+        tok = Token(
+            kind=tok_kind,
+            lexeme=lexeme,
+            literal=literal,
         )
+        if debug:
+            print("token scanned:\n", tok)
+
+        tokens.append(tok)
 
         # go to next token
         idx += 1
@@ -136,7 +144,7 @@ def main():
     raw_source_text = (LISP_SNIPPET_DIR / snippet_name).read_text()
 
     # try to scan the source!
-    tokens = scan(raw_source_text)
+    tokens = scan(raw_source_text, debug=True)
 
     print("Tokens:\n", tokens)
 
