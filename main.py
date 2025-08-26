@@ -31,6 +31,8 @@ class Token:
 
 def scan(source: str, debug: bool = False) -> list[Token]:
     "From raw source text to a 'stream' of tokens"
+    source = source.strip()
+
     tokens: list[Token] = []
     idx = 0  # idx into the source text
 
