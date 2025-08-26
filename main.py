@@ -15,8 +15,8 @@ class TokenKind(Enum):
     NIL = "nil"
     TRUE = "t"
     #
-    STRING = None
-    NUMBER = None
+    STRING = "string"
+    NUMBER = "number"
     #
     LEFT_PAREN = "("
     RIGHT_PAREN = ")"
