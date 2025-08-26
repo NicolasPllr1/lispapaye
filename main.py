@@ -23,8 +23,8 @@ class TokenKind(Enum):
 @dataclass
 class Token:
     kind: TokenKind
-    lexeme: str | None  # TODO: think about the need for both lexeme and literal
-    literal: str | None
+    lexeme: str  # from the source
+    literal: str | None  # not every token is a literal / has a literal _value_
 
 
 def main():
