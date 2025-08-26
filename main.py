@@ -61,8 +61,7 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 # NOTE: for now, assume its an integer, not a float (i.e. no decimal point)
                 head = idx
                 # look for the end of the number
-                idx += 1
-                while idx < len(source) and source[idx].isdigit():
+                while idx + 1 < len(source) and source[idx + 1].isdigit():
                     idx += 1
                 lexeme = source[head:idx]  # TODO: double check the bounds
                 if debug:
