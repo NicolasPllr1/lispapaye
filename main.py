@@ -6,6 +6,7 @@ from pathlib import Path
 from rich import print
 
 
+# NOTE: can't use None as the value for STRING, NUMBER, and VAR_NAME (values must be != ?)
 class TokenKind(Enum):
     PLUS = "+"
     MINUS = "-"
@@ -23,6 +24,8 @@ class TokenKind(Enum):
     #
     LEFT_PAREN = "("
     RIGHT_PAREN = ")"
+    #
+    VAR_NAME = "var_name"  # e.g. in 'Artichoke, Artichoke is VAR_NAME (variable name)
 
 
 @dataclass
@@ -141,9 +144,19 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                     literal = None
                     idx += len(TokenKind.QUOTE.value)
                 else:
-                    raise ValueError(
-                        f"Unexpected character at index {idx}: {source[idx]}"
-                    )
+                    # try to parse a variable name
+                    tok_kind = TokenKind.VAR_NAME
+                    head = idx  # idx of the double-quote " symbol
+
+                    while idx < len(source) and source[idx].isalpha():
+                        idx += 1
+
+                    if head < idx:
+                        lexeme = source[head:idx]
+                    else:
+                        raise ValueError(
+                            f"Expected variable name to have at least length of 1 at index {idx}: {source[idx]}"
+                        )
 
         tok = Token(
             kind=tok_kind,
