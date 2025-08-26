@@ -84,7 +84,9 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                         "Expect a string after a double-quote, found the end of the source file"
                     )
 
-                while idx < len(source) and source[idx] != '"':
+                while (
+                    idx < len(source) and source[idx] != '"' and source[idx].isalpha()
+                ):
                     idx += 1
 
                 # check the closing double-quote " has been found before the end of the file
