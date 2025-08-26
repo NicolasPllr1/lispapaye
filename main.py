@@ -52,7 +52,7 @@ def scan(source: str, debug: bool = False) -> list[Token]:
             case "(":
                 tok_kind = TokenKind.LEFT_PAREN
                 lexeme = source[idx]
-            case "(":
+            case ")":
                 tok_kind = TokenKind.RIGHT_PAREN
                 lexeme = source[idx]
             case number if number.isdigit():
