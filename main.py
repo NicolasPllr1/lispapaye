@@ -251,12 +251,19 @@ class Parser:
             return Operator(op=tok)
         elif tok.kind in SPECIAL_OPERATORS_TOKEN_KIND:
             # NOTE: assuming they all work like the abbreviated quote. We only support this one in the scanner anyway for now
-            assert tok.kind == TokenKind.QUOTE_ABR, (
-                "special operator is expected to be the abbreviated quote for now"
-            )
+            assert (
+                tok.kind == TokenKind.QUOTE_ABR
+            ), "special operator is expected to be the abbreviated quote for now"
 
             # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book
-            return self.parse()
+            quoted_ast = self.parse()
+
+            # re-wrap using the normal quote
+            # My idea is that the quote abbreviation is syntactic sugar for (quote ...) --> we recover the full ast for the user
+            return [
+                Operator(op=Token(kind=TokenKind.QUOTE, lexeme="quote", literal=None)),
+                quoted_ast,
+            ]
 
         elif tok.kind == TokenKind.LEFT_PAREN:
             list_items: list[Expression] = []
@@ -285,23 +292,28 @@ class Parser:
             )
 
 
-def main():
-    LISP_SNIPPET_DIR = Path("lisp_snippets")
-
-    if len(sys.argv) > 0:
-        snippet_name = sys.argv[1]
-    else:
-        snippet_name = "addition.lisp"
-
-    raw_source_text = (LISP_SNIPPET_DIR / snippet_name).read_text()
+def process_snippet(snippet_name: str, snippet_dir: Path):
+    print(f"--- {snippet_name} ---")
+    raw_source_text = (snippet_dir / snippet_name).read_text()
     print(f"Source:\n{raw_source_text}")
 
     # try to scan the source!
     tokens = scan(raw_source_text)
 
     ast = Parser(tokens=tokens).parse()
-    print("Final AST:")
+    print(f"Final AST for {snippet_name}:")
     print(ast)
+
+
+def main():
+    LISP_SNIPPET_DIR = Path("lisp_snippets")
+
+    if len(sys.argv) > 1:
+        snippet_name = sys.argv[1]
+        process_snippet(snippet_name, LISP_SNIPPET_DIR)
+    else:
+        for snippet_path in LISP_SNIPPET_DIR.glob("*.lisp"):
+            process_snippet(snippet_path.name, LISP_SNIPPET_DIR)
 
 
 if __name__ == "__main__":
