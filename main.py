@@ -69,6 +69,7 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 while idx + 1 < len(source) and source[idx + 1].isdigit():
                     idx += 1
                 lexeme = source[head : idx + 1]  # TODO: double check the bounds
+                literal = str(int(lexeme))  # NOTE: assuming int again
                 if debug:
                     print(f"after number scanning, idx is {idx}")
             case '"':
