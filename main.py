@@ -148,13 +148,14 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 else:
                     # try to parse a symbol
                     tok_kind = TokenKind.SYMBOL
-                    head = idx  # idx of the double-quote " symbol
+                    head = idx  # idx of the symbol first character
 
                     while idx < len(source) and source[idx].isalpha():
                         idx += 1
 
                     if head < idx:
                         lexeme = source[head:idx]
+                        literal = lexeme
                     else:
                         raise ValueError(
                             f"Expected variable name to have at least length of 1 at index {idx}: {source[idx]}"
