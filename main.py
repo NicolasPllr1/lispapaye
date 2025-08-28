@@ -184,7 +184,9 @@ OPERATORS_TOKEN_KIND: set[TokenKind] = {
     #
     TokenKind.QUOTE,
     TokenKind.CONS,
-    #
+}
+
+SPECIAL_OPERATORS_TOKEN_KIND: set[TokenKind] = {
     TokenKind.QUOTE_ABR,
 }
 
@@ -220,7 +222,13 @@ class Atom:
 Expression = Atom | Operator | list["Expression"]
 
 PAREN_TOKEN_KINDS = {TokenKind.LEFT_PAREN, TokenKind.RIGHT_PAREN}
-assert ATOM_TOKEN_KINDS | OPERATORS_TOKEN_KIND | PAREN_TOKEN_KINDS == set(TokenKind)
+assert (
+    ATOM_TOKEN_KINDS
+    | OPERATORS_TOKEN_KIND
+    | SPECIAL_OPERATORS_TOKEN_KIND
+    | PAREN_TOKEN_KINDS
+    == set(TokenKind)
+), "Not all token-kinds covered by parsing sets"
 
 
 @dataclass
@@ -231,6 +239,9 @@ class Parser:
     def parse(self) -> Expression:
         "Assume the tokens reprends a single expression (no declarations, pure? lisp!)"
 
+        if self.idx >= len(self.tokens):
+            raise ValueError("Ran out of tokens")
+
         tok = self.tokens[self.idx]
         self.idx += 1  # 'consume' the tok
 
@@ -238,6 +249,15 @@ class Parser:
             return Atom(atom=tok)
         elif tok.kind in OPERATORS_TOKEN_KIND:
             return Operator(op=tok)
+        elif tok.kind in SPECIAL_OPERATORS_TOKEN_KIND:
+            # NOTE: assuming they all work like the abbreviated quote. We only support this one in the scanner anyway for now
+            assert tok.kind == TokenKind.QUOTE_ABR, (
+                "special operator is expected to be the abbreviated quote for now"
+            )
+
+            # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book
+            return self.parse()
+
         elif tok.kind == TokenKind.LEFT_PAREN:
             list_items: list[Expression] = []
             while (
