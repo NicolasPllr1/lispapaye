@@ -177,7 +177,7 @@ def scan(source: str, debug: bool = False) -> list[Token]:
     return tokens
 
 
-# Kind of tokens which can be used as a _function argument_
+# my current mental model for operators are that they are symbols which refer to functions
 OPERATORS_TOKEN_KIND: set[TokenKind] = {
     TokenKind.PLUS,
     TokenKind.MINUS,
@@ -187,6 +187,7 @@ OPERATORS_TOKEN_KIND: set[TokenKind] = {
     TokenKind.CONS,
 }
 
+# special functions, which do not follow the typical (operator, arg1, ..., argN) pattern
 SPECIAL_OPERATORS_TOKEN_KIND: set[TokenKind] = {
     TokenKind.QUOTE_ABR,
 }
@@ -194,10 +195,11 @@ SPECIAL_OPERATORS_TOKEN_KIND: set[TokenKind] = {
 
 @dataclass
 class Operator:
-    op: Token  # token-kind in OPERATORS_TOKEN_KIND
+    op: Token  # token-kind should be in OPERATORS_TOKEN_KIND or SPECIAL_OPERATORS_TOKEN_KIND ('quote')
 
 
-# Kind of tokens which are atomic piece of _data_
+# Kind of tokens which are atomic piece of _data_, or a symbol
+# My current mental model for symbols is that they are either built-in 'keywords'/functions or akin to variable names
 ATOM_TOKEN_KINDS: set[TokenKind] = {
     TokenKind.STRING,
     TokenKind.NUMBER,
@@ -215,11 +217,12 @@ class Atom:
     Special leaf tokens. Like elementary pieces of data such as a literal string or a number.
     """
 
-    atom: Token  # token-kind in ATOM_TOKEN_KINDS
+    atom: Token  # token-kind should be in ATOM_TOKEN_KINDS
 
 
-# "All Lisp expressions are either atoms, like 1, or lists, which consist of zero or more expressions enclosed in parentheses" from Graham's book, chap 2.
-# either an atom, an operator (i.e. a function or a special operator) or a list of them
+# "Another beauty of Lisp notation is: this is all there is.  All Lisp expressions are either atoms, like 1, or lists, which consist of zero or more expressions enclosed in parentheses." from Graham's book (end of 2.1)
+# The wikipedia page is also helpful: https://en.wikipedia.org/wiki/Lisp_(programming_language)#Syntax_and_semantics
+# --> An expression is either an atom, an operator (i.e. a function or a special operator) or a list of them
 Expression = Atom | Operator | list["Expression"]
 
 PAREN_TOKEN_KINDS = {TokenKind.LEFT_PAREN, TokenKind.RIGHT_PAREN}
@@ -256,7 +259,7 @@ class Parser:
                 "special operator is expected to be the abbreviated quote for now"
             )
 
-            # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book
+            # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book (end of 2.2)
             quoted_ast = self.parse()
 
             # re-wrap using the normal quote
@@ -298,7 +301,6 @@ def process_snippet(snippet_name: str, snippet_dir: Path):
     raw_source_text = (snippet_dir / snippet_name).read_text()
     print(f"Source:\n{raw_source_text}")
 
-    # try to scan the source!
     tokens = scan(raw_source_text)
 
     ast = Parser(tokens=tokens).parse()
