@@ -275,7 +275,7 @@ class Parser:
                 list_items.append(next_item)
 
             # check if we stopped parsing because we run out of tokens
-            ran_out_of_tokens = self.idx == len(self.tokens)  # TODO: verify this bound
+            ran_out_of_tokens = self.idx == len(self.tokens)
             if ran_out_of_tokens:
                 raise ValueError(
                     "Ran out of tokens before finding the end of the list (right paren)"
