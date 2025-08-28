@@ -7,7 +7,7 @@ from typing import Union
 from rich import print
 
 
-# NOTE: can't use None as the value for STRING, NUMBER, and VAR_NAME (values must be != ?)
+# NOTE: can't use None as the value for STRING, NUMBER, and SYMBOL (values must be != ?)
 class TokenKind(Enum):
     PLUS = "+"
     MINUS = "-"
@@ -26,7 +26,7 @@ class TokenKind(Enum):
     LEFT_PAREN = "("
     RIGHT_PAREN = ")"
     #
-    VAR_NAME = "var_name"  # e.g. in 'Artichoke, Artichoke is VAR_NAME (variable name)
+    SYMBOL = "symbol"  # e.g. in 'Artichoke, Artichoke is the symbol (~variable name ?)
 
 
 @dataclass
@@ -147,8 +147,8 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                     literal = None
                     idx += len(TokenKind.QUOTE.value)
                 else:
-                    # try to parse a variable name
-                    tok_kind = TokenKind.VAR_NAME
+                    # try to parse a symbol
+                    tok_kind = TokenKind.SYMBOL
                     head = idx  # idx of the double-quote " symbol
 
                     while idx < len(source) and source[idx].isalpha():
@@ -217,7 +217,7 @@ ATOM_TOKEN_KINDS: set[TokenKind] = {
     TokenKind.NIL,
     TokenKind.TRUE,
     #
-    TokenKind.VAR_NAME,
+    TokenKind.SYMBOL,
 }
 
 
