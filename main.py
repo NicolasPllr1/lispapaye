@@ -6,7 +6,6 @@ from pathlib import Path
 from rich import print
 
 
-# NOTE: can't use None as the value for STRING, NUMBER, and SYMBOL (values must be != ?)
 class TokenKind(Enum):
     PLUS = "+"
     MINUS = "-"
@@ -251,9 +250,9 @@ class Parser:
             return Operator(op=tok)
         elif tok.kind in SPECIAL_OPERATORS_TOKEN_KIND:
             # NOTE: assuming they all work like the abbreviated quote. We only support this one in the scanner anyway for now
-            assert (
-                tok.kind == TokenKind.QUOTE_ABR
-            ), "special operator is expected to be the abbreviated quote for now"
+            assert tok.kind == TokenKind.QUOTE_ABR, (
+                "special operator is expected to be the abbreviated quote for now"
+            )
 
             # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book
             quoted_ast = self.parse()
