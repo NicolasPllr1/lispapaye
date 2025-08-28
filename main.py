@@ -2,7 +2,6 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Union
 
 from rich import print
 
@@ -177,36 +176,22 @@ def scan(source: str, debug: bool = False) -> list[Token]:
     return tokens
 
 
-@dataclass
-class AstNode:
-    node: list[
-        Union["AstNode", "SExpr", "Atom"]
-    ]  # https://en.wikipedia.org/wiki/Lisp_(programming_language)#Lists
-
-
 # Kind of tokens which can be used as a _function argument_
-FN_TOKEN_KINDS: set[TokenKind] = {
+OPERATORS_TOKEN_KIND: set[TokenKind] = {
     TokenKind.PLUS,
     TokenKind.MINUS,
     TokenKind.SLASH,
     #
     TokenKind.QUOTE,
-    TokenKind.QUOTE_ABR,
     TokenKind.CONS,
     #
-    TokenKind.VAR_NAME,
+    TokenKind.QUOTE_ABR,
 }
 
 
 @dataclass
-class SExpr(AstNode):
-    """
-        List where the first element is a function name.
-    The list tail is parsed as a list of args to the function.
-    """
-
-    fn_name: Token
-    args: list[AstNode]
+class Operator:
+    op: Token  # token-kind in OPERATORS_TOKEN_KIND
 
 
 # Kind of tokens which are atomic piece of _data_
@@ -227,14 +212,16 @@ class Atom:
     Special leaf tokens. Like elementary pieces of data such as a literal string or a number.
     """
 
-    atom: Token
+    atom: Token  # token-kind in ATOM_TOKEN_KINDS
 
 
-Ast = Atom | AstNode  # either a plain leaf or an 'internal' node
+# "All Lisp expressions are either atoms, like 1, or lists, which consist of zero or more expressions enclosed in parentheses" from Graham's book, chap 2.
+# either an atom, an operator (i.e. a function or a special operator) or a list of them
+Expression = Atom | Operator | list["Expression"]
 
+PAREN_TOKEN_KINDS = {TokenKind.LEFT_PAREN, TokenKind.RIGHT_PAREN}
+assert ATOM_TOKEN_KINDS | OPERATORS_TOKEN_KIND | PAREN_TOKEN_KINDS == set(TokenKind)
 
-def parse(tokens: list[Token]) -> AstNode:
-    return AstNode(node=[])
 
 
 def main():
