@@ -2,6 +2,7 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Union
 
 from rich import print
 
@@ -174,6 +175,66 @@ def scan(source: str, debug: bool = False) -> list[Token]:
         idx += 1
 
     return tokens
+
+
+@dataclass
+class AstNode:
+    node: list[
+        Union["AstNode", "SExpr", "Atom"]
+    ]  # https://en.wikipedia.org/wiki/Lisp_(programming_language)#Lists
+
+
+# Kind of tokens which can be used as a _function argument_
+FN_TOKEN_KINDS: set[TokenKind] = {
+    TokenKind.PLUS,
+    TokenKind.MINUS,
+    TokenKind.SLASH,
+    #
+    TokenKind.QUOTE,
+    TokenKind.QUOTE_ABR,
+    TokenKind.CONS,
+    #
+    TokenKind.VAR_NAME,
+}
+
+
+@dataclass
+class SExpr(AstNode):
+    """
+        List where the first element is a function name.
+    The list tail is parsed as a list of args to the function.
+    """
+
+    fn_name: Token
+    args: list[AstNode]
+
+
+# Kind of tokens which are atomic piece of _data_
+ATOM_TOKEN_KINDS: set[TokenKind] = {
+    TokenKind.STRING,
+    TokenKind.NUMBER,
+    #
+    TokenKind.NIL,
+    TokenKind.TRUE,
+    #
+    TokenKind.VAR_NAME,
+}
+
+
+@dataclass
+class Atom:
+    """
+    Special leaf tokens. Like elementary pieces of data such as a literal string or a number.
+    """
+
+    atom: Token
+
+
+Ast = Atom | AstNode  # either a plain leaf or an 'internal' node
+
+
+def parse(tokens: list[Token]) -> AstNode:
+    return AstNode(node=[])
 
 
 def main():
