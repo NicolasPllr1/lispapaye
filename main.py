@@ -223,6 +223,47 @@ PAREN_TOKEN_KINDS = {TokenKind.LEFT_PAREN, TokenKind.RIGHT_PAREN}
 assert ATOM_TOKEN_KINDS | OPERATORS_TOKEN_KIND | PAREN_TOKEN_KINDS == set(TokenKind)
 
 
+@dataclass
+class Parser:
+    tokens: list[Token]
+    idx: int = 0  # idx of the token currently being processed
+
+    def parse(self) -> Expression:
+        "Assume the tokens reprends a single expression (no declarations, pure? lisp!)"
+
+        tok = self.tokens[self.idx]
+        self.idx += 1  # 'consume' the tok
+
+        if tok.kind in ATOM_TOKEN_KINDS:
+            return Atom(atom=tok)
+        elif tok.kind in OPERATORS_TOKEN_KIND:
+            return Operator(op=tok)
+        elif tok.kind == TokenKind.LEFT_PAREN:
+            list_items: list[Expression] = []
+            while (
+                self.idx < len(self.tokens)
+                and self.tokens[self.idx].kind != TokenKind.RIGHT_PAREN
+            ):
+                next_item = self.parse()
+                list_items.append(next_item)
+
+            # check if we stopped parsing because we run out of tokens
+            ran_out_of_tokens = self.idx == len(self.tokens)  # TODO: verify this bound
+            if ran_out_of_tokens:
+                raise ValueError(
+                    "Ran out of tokens before finding the end of the list (right paren)"
+                )
+
+            # consume the right paren
+            self.idx += 1
+            return list_items
+
+        else:
+            raise ValueError(
+                f"Unexpected token at idx {self.idx}: {tok}. "
+                "Expected either an atom of data, an operator or a left parenthesis"
+            )
+
 
 def main():
     LISP_SNIPPET_DIR = Path("lisp_snippets")
@@ -238,6 +279,9 @@ def main():
     # try to scan the source!
     tokens = scan(raw_source_text)
 
+    ast = Parser(tokens=tokens).parse()
+    print("Final AST:")
+    print(ast)
 
 
 if __name__ == "__main__":
