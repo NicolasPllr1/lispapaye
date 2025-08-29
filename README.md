@@ -3,6 +3,16 @@
 This LISP interpreter was started as a mini-project to get into the
 [Recurse Center](https://www.recurse.com/).
 
+## Quick try
+
+Using [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv sync  # create virtual env. at .venv/ and install project dependencies (described in pyproject.toml)
+source .venv/bin/activate # activate your virtual env.
+python main.py # runs the parser over all snippets in lisp_snippets/
+```
+
 ## Lisp code snippets
 
 I will take examples from
