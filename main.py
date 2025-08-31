@@ -310,8 +310,8 @@ def main():
     LISP_SNIPPET_DIR = Path("lisp_snippets")
 
     if len(sys.argv) > 1:
-        snippet_name = sys.argv[1]
-        process_snippet(snippet_name, LISP_SNIPPET_DIR)
+        snippet_path = Path(sys.argv[1])
+        process_snippet(snippet_path.name, snippet_path.parent)
     else:
         for snippet_path in LISP_SNIPPET_DIR.glob("*.lisp"):
             process_snippet(snippet_path.name, LISP_SNIPPET_DIR)
