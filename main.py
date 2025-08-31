@@ -11,6 +11,7 @@ class TokenKind(Enum):
     MINUS = "-"
     SLASH = "/"
     #
+    # TODO: add other 'basic' built-ins: list, car/cdr, first, lambda
     QUOTE = "quote"
     QUOTE_ABR = "'"
     CONS = "cons"
