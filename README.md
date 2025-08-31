@@ -13,9 +13,10 @@ source .venv/bin/activate # activate your virtual env.
 python main.py # runs the parser over all snippets in lisp_snippets/
 ```
 
-Running `python main.py` will run the scanner + parser over all examples in
-`./lisp_snippets/`. You can also target a single file, for example:
-`python main.py lisp_snippets/symbol.lisp`.
+- Running `python main.py` will run the scanner + parser over all examples in
+  `./lisp_snippets/`.
+- You can also target a single file, for example:
+  `python main.py lisp_snippets/symbol.lisp`.
 
 ## Lisp code snippets
 
