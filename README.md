@@ -58,3 +58,22 @@ I would like to parse the basic pieces of syntax I outlined in the
 ### 3. Interpreting
 
 This will be done pair-programming!
+
+## Resources
+
+- Original 1960 paper by John McCarthy: \[Recursive Functions of Symbolic
+  Expressions and Their Computation by Machine, Part
+  I\]((https://www-formal.stanford.edu/jmc/recursive.pdf)
+
+- Paul Graham's work
+
+  - [ANSI Common Lisp](https://www.paulgraham.com/acl.html) (1995)
+  - [The root of Lisp](https://paulgraham.com/rootsoflisp.html) (may 2001)
+  - [What made Lisp different](https://paulgraham.com/diff.html) (dec 2001)
+  - [Bel](https://paulgraham.com/bel.html) (oct 2019)
+
+- Wikipedia
+
+  - [Lisp](<https://en.wikipedia.org/wiki/Lisp_(programming_language)>)
+  - [S-expression](https://en.wikipedia.org/wiki/S-expression)
+  - [Interpreter#History](<https://en.wikipedia.org/wiki/Interpreter_(computing)#History>)
