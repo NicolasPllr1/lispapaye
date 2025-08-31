@@ -62,15 +62,26 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 tok_kind = TokenKind.RIGHT_PAREN
                 lexeme = source[idx]
             case number if number.isdigit():
+                # https://www.gnu.org/software/emacs/manual/html_node/elisp/Float-Basics.html
                 tok_kind = TokenKind.NUMBER
 
-                # NOTE: for now, assume its an integer, not a float (i.e. no decimal point)
                 head = idx
+                no_dot_yet = True  # keep track if we've encountered a '.', e.g. in '3.14', or '3.'
+
                 # look for the end of the number
-                while idx + 1 < len(source) and source[idx + 1].isdigit():
+                while idx + 1 < len(source) and (
+                    source[idx + 1].isdigit() or (source[idx + 1] == "." and no_dot_yet)
+                ):
                     idx += 1
+                    if source[idx] == ".":
+                        no_dot_yet = False  # we just passed a dot
+
                 lexeme = source[head : idx + 1]  # TODO: double check the bounds
-                literal = str(int(lexeme))  # NOTE: assuming int again
+
+                if no_dot_yet:
+                    literal = str(int(lexeme))
+                else:
+                    literal = str(float(lexeme))
                 if debug:
                     print(f"after number scanning, idx is {idx}")
             case '"':
@@ -253,9 +264,9 @@ class Parser:
             return Operator(op=tok)
         elif tok.kind in SPECIAL_OPERATORS_TOKEN_KIND:
             # NOTE: assuming they all work like the abbreviated quote. We only support this one in the scanner anyway for now
-            assert (
-                tok.kind == TokenKind.QUOTE_ABR
-            ), "special operator is expected to be the abbreviated quote for now"
+            assert tok.kind == TokenKind.QUOTE_ABR, (
+                "special operator is expected to be the abbreviated quote for now"
+            )
 
             # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book (end of 2.2)
             quoted_ast = self.parse()
