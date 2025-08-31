@@ -80,6 +80,9 @@ def scan(source: str, debug: bool = False) -> list[Token]:
 
                 if no_dot_yet:
                     literal = str(int(lexeme))
+                elif source[idx] == ".":
+                    # no decimal part, like in '3.' -> view it as an int
+                    literal = str(int(lexeme[:-1]))
                 else:
                     literal = str(float(lexeme))
                 if debug:
@@ -264,9 +267,9 @@ class Parser:
             return Operator(op=tok)
         elif tok.kind in SPECIAL_OPERATORS_TOKEN_KIND:
             # NOTE: assuming they all work like the abbreviated quote. We only support this one in the scanner anyway for now
-            assert tok.kind == TokenKind.QUOTE_ABR, (
-                "special operator is expected to be the abbreviated quote for now"
-            )
+            assert (
+                tok.kind == TokenKind.QUOTE_ABR
+            ), "special operator is expected to be the abbreviated quote for now"
 
             # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book (end of 2.2)
             quoted_ast = self.parse()
