@@ -59,6 +59,21 @@ I would like to parse the basic pieces of syntax I outlined in the
 
 This will be done pair-programming!
 
+Ideas:
+
+- Assume the lisp program is a single expression: the goal is to evaluate it
+- We need to define what are the _possible return values_: numbers, true/nil,
+  strings, symbols, lists (~any Lisp program (!), through quoting) And translate
+  them to python-land.
+- A list is interpreted either as data (a list of data) or as code (a function)
+- Keep Lisp _evaluation rule_ in mind when interpreting lists:
+  1. evaluate args from left to right, recursively
+  2. the args' values are passed to the function named by the operator (which is
+     the list first element)
+
+Note: when interpreting a list, it it's not quoted, then it must be a function
+-> the first element must be an operator or point/refer to a function
+
 ## Resources
 
 - Original 1960 paper by John McCarthy: \[Recursive Functions of Symbolic
