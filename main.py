@@ -72,11 +72,12 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 while idx + 1 < len(source) and (
                     source[idx + 1].isdigit() or (source[idx + 1] == "." and no_dot_yet)
                 ):
-                    idx += 1
+                    idx += 1  # update idx: now source[idx] is the digit (or '.') we just checked
                     if source[idx] == ".":
                         no_dot_yet = False  # we just passed a dot
 
-                lexeme = source[head : idx + 1]  # TODO: double check the bounds
+                # NOTE: source[idx] is the last digit (or '.') in the number
+                lexeme = source[head : idx + 1]
 
                 if no_dot_yet:
                     literal = str(int(lexeme))
