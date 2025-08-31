@@ -119,29 +119,17 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 tok_kind = TokenKind.MINUS
                 lexeme = source[idx]
             case _:
-                if (
-                    idx + len(TokenKind.NIL.value) - 1 < len(source)
-                    and source[idx : idx + len(TokenKind.NIL.value)]
-                    == TokenKind.NIL.value
-                ):
+                if check_longer_token_match(TokenKind.NIL, idx, source):
                     tok_kind = TokenKind.NIL
                     lexeme = TokenKind.NIL.value
                     literal = None
                     idx += len(TokenKind.NIL.value)
-                elif (
-                    idx + len(TokenKind.CONS.value) - 1 < len(source)
-                    and source[idx : idx + len(TokenKind.CONS.value)]
-                    == TokenKind.CONS.value
-                ):
+                elif check_longer_token_match(TokenKind.CONS, idx, source):
                     tok_kind = TokenKind.CONS
                     lexeme = TokenKind.CONS.value
                     literal = None
                     idx += len(TokenKind.CONS.value)
-                elif (
-                    idx + len(TokenKind.QUOTE.value) - 1 < len(source)
-                    and source[idx : idx + len(TokenKind.QUOTE.value)]
-                    == TokenKind.QUOTE.value
-                ):
+                elif check_longer_token_match(TokenKind.QUOTE, idx, source):
                     tok_kind = TokenKind.QUOTE
                     lexeme = TokenKind.QUOTE.value
                     literal = None
@@ -176,6 +164,15 @@ def scan(source: str, debug: bool = False) -> list[Token]:
         idx += 1
 
     return tokens
+
+
+def check_longer_token_match(
+    target_token_kind: TokenKind, idx: int, source: str
+) -> bool:
+    return (
+        idx + len(target_token_kind.value) - 1 < len(source)
+        and source[idx : idx + len(target_token_kind.value)] == target_token_kind.value
+    )
 
 
 # my current mental model for operators are that they are symbols which refer to functions
