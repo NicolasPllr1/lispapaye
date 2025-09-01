@@ -49,10 +49,10 @@ def scan(source: str, debug: bool = False) -> list[Token]:
         literal: str | None = None
         lexeme: str
         match source[idx]:
-            case " ":
+            case " " | "\n":
                 # skip whitespace
                 if debug:
-                    print("skipping whitespace")
+                    print(f"skipping whitespace idx {idx}")
                 idx += 1
                 continue
             case "(":
@@ -150,6 +150,8 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                     literal = None
                     idx += len(TokenKind.QUOTE.value)
                 else:
+                    if debug:
+                        print("parsing a symbol")
                     # try to parse a symbol
                     tok_kind = TokenKind.SYMBOL
                     head = idx  # idx of the symbol first character
@@ -160,6 +162,8 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                     if head < idx:
                         lexeme = source[head:idx]
                         literal = lexeme
+
+                        idx -= 1
                     else:
                         raise ValueError(
                             f"Expected variable name to have at least length of 1 at index {idx}: {source[idx]}"
@@ -171,7 +175,7 @@ def scan(source: str, debug: bool = False) -> list[Token]:
             literal=literal,
         )
         if debug:
-            print("token scanned:\n", tok)
+            print("token scanned:", tok)
 
         tokens.append(tok)
 
@@ -268,9 +272,9 @@ class Parser:
             return Operator(op=tok)
         elif tok.kind in SPECIAL_OPERATORS_TOKEN_KIND:
             # NOTE: assuming they all work like the abbreviated quote. We only support this one in the scanner anyway for now
-            assert (
-                tok.kind == TokenKind.QUOTE_ABR
-            ), "special operator is expected to be the abbreviated quote for now"
+            assert tok.kind == TokenKind.QUOTE_ABR, (
+                "special operator is expected to be the abbreviated quote for now"
+            )
 
             # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book (end of 2.2)
             quoted_ast = self.parse()

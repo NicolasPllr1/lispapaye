@@ -1,1 +1,1 @@
-'Artichoke
+'(Artichoke)
