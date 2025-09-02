@@ -313,8 +313,34 @@ class Parser:
             )
 
 
+LispValue = str | int | float | bool | None
+
+
+def evaluate(expresssion: Expression) -> LispValue:
+    match expresssion:
+        case Atom(atom):
+            return atom.literal
+        case Operator():
+            raise NotImplementedError()
+        case _:
+            op = expresssion[0]
+            print("Received op:", op)
+
+            raw_args = expresssion[1:]  # expressions
+            print("raw args (expressions): ", raw_args)
+            args_values = [evaluate(arg) for arg in raw_args]
+            print("args values?:", args_values)
+
+            return evalate_single_op(op.op, args_values)
+
+
+def evalate_single_op(op: Token, args: list[LispValue]):
+    match op.kind:
+        case TokenKind.PLUS:
+            return sum([int(arg) for arg in args])
+
+
 def process_snippet(snippet_name: str, snippet_dir: Path):
-    print(f"--- {snippet_name} ---")
     raw_source_text = (snippet_dir / snippet_name).read_text()
     print(f"Source:\n{raw_source_text}")
 
@@ -323,6 +349,9 @@ def process_snippet(snippet_name: str, snippet_dir: Path):
     ast = Parser(tokens=tokens).parse()
     print(f"Final AST for {snippet_name}:")
     print(ast)
+
+    val = evaluate(ast)
+    print("Value:", val)
 
 
 def main():
