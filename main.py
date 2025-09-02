@@ -28,11 +28,14 @@ class TokenKind(Enum):
     SYMBOL = "symbol"  # e.g. in 'Artichoke, Artichoke is the symbol (~variable name ?)
 
 
+LispValue = str | int | float | bool | None
+
+
 @dataclass
 class Token:
     kind: TokenKind
     lexeme: str  # from the source
-    literal: str | None  # not every token is a literal / has a literal _value_
+    literal: LispValue  # not every token is a literal / has a literal _value_
 
 
 def scan(source: str, debug: bool = False) -> list[Token]:
@@ -46,7 +49,7 @@ def scan(source: str, debug: bool = False) -> list[Token]:
         if debug:
             print(f"Scanning at idx {idx}: {source[idx]}")
         tok_kind: TokenKind
-        literal: str | None = None
+        literal: LispValue = None
         lexeme: str
         match source[idx]:
             case " " | "\n":
@@ -80,12 +83,12 @@ def scan(source: str, debug: bool = False) -> list[Token]:
                 lexeme = source[head : idx + 1]
 
                 if no_dot_yet:
-                    literal = str(int(lexeme))
+                    literal = int(lexeme)
                 elif source[idx] == ".":
                     # no decimal part, like in '3.' -> view it as an int
-                    literal = str(int(lexeme[:-1]))
+                    literal = int(lexeme[:-1])
                 else:
-                    literal = str(float(lexeme))
+                    literal = float(lexeme)
                 if debug:
                     print(f"after number scanning, idx is {idx}")
             case '"':
@@ -279,8 +282,8 @@ class Parser:
             # "You can get the effect of calling quote by affixing a ' to the front of any expression" from Graham's book (end of 2.2)
             quoted_ast = self.parse()
 
-            # re-wrap using the normal quote
-            # My idea is that the quote abbreviation is syntactic sugar for (quote ...) --> we recover the full ast for the user
+            # re-wrap using the normal quote (i.e., desugar the expression)
+            # My idea is that the quote abbreviation is syntactic sugar for (quote ...) --> we recover the full ast for the user , i.e. prepent the quote
             return [
                 Operator(op=Token(kind=TokenKind.QUOTE, lexeme="quote", literal=None)),
                 quoted_ast,
@@ -313,31 +316,65 @@ class Parser:
             )
 
 
-LispValue = str | int | float | bool | None
-
-
 def evaluate(expresssion: Expression) -> LispValue:
     match expresssion:
         case Atom(atom):
             return atom.literal
         case Operator():
-            raise NotImplementedError()
-        case _:
-            op = expresssion[0]
-            print("Received op:", op)
+            raise NotImplementedError("Value of an operator not implemented yet")
+        case sub_expr:
+            op = sub_expr[0]
+            assert isinstance(op, Operator), (
+                f"First item of a list should be an operator, got: {op}"
+            )
 
-            raw_args = expresssion[1:]  # expressions
-            print("raw args (expressions): ", raw_args)
-            args_values = [evaluate(arg) for arg in raw_args]
-            print("args values?:", args_values)
+            if op.op.kind == TokenKind.QUOTE:
+                assert len(sub_expr) == 2, (
+                    f"Invalid arguments for quote operator. Should be a single argument, got {len(sub_expr) - 1}: {sub_expr[1:]}"
+                )
+                return sub_expr[1]  # NOTE: by pass evaluation of the args
+            else:
+                raw_args = sub_expr[1:]  # expressions
+                args_values = [evaluate(arg) for arg in raw_args]
 
-            return evalate_single_op(op.op, args_values)
+                return evalate_single_op(op.op, args_values)
 
 
-def evalate_single_op(op: Token, args: list[LispValue]):
+def evalate_single_op(op: Token, args: list[LispValue]) -> LispValue | list[LispValue]:
+    assert op.kind in OPERATORS_TOKEN_KIND, (
+        f"operator {op} does not have the expected kind. Should be one of: {OPERATORS_TOKEN_KIND}"
+    )
     match op.kind:
         case TokenKind.PLUS:
-            return sum([int(arg) for arg in args])
+            assert all([isinstance(arg, int | float) for arg in args]), (
+                f"Invalid arguments. Addition operator operates on number, received: {args}"
+            )
+            return sum([float(arg) for arg in args])
+        case TokenKind.MINUS:
+            assert all([isinstance(arg, int | float) for arg in args]), (
+                f"Invalid arguments. Substraction operator operates on number, received: {args}"
+            )
+            res = args[0]
+            for term in args[1:]:
+                res -= term
+            return res
+        case TokenKind.SLASH:
+            assert all([isinstance(arg, int | float) for arg in args]), (
+                f"Invalid arguments. Division operator operates on number, received: {args}"
+            )
+            res = args[0]
+            for divisor in args[1:]:
+                if divisor == 0:
+                    raise ValueError(
+                        f"Invalid argument. Divisor should not be 0: {divisor}"
+                    )
+                res /= divisor
+            return res
+        case TokenKind.CONS:
+            assert len(args) == 2, (
+                f"Invalid number of arguments to cons operator, should be two but got {len(args)}: {args}"
+            )
+            return args
 
 
 def process_snippet(snippet_name: str, snippet_dir: Path):
